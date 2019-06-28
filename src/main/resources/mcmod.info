@@ -1,0 +1,16 @@
+[
+{
+  "modid": "elementalresearch",
+  "name": "Elemental Research",
+  "description": "A cool mod :sunglasses:",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["al132"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

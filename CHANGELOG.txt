@@ -1,0 +1,34 @@
+1.1.7
+===
+-Crash (should?) be fixed
+-research points should no longer go negative
+-Fixed invisible/ghost shop entries
+-Fixed being able to infinitely page through the shop even if there were no more entries
+-Removed shop hotkey
+
+Known Issues:
+-May be incompatible with pre-existing worlds
+
+1.1.6
+===
+Enhancements:
+-Fixed control menu localization
+-Added a functioning research book item
+-Added functioning arrow buttons (can also use 'A' and 'D' to navigate pages)
+
+Known Bugs:
+-Upgrades that shouldn't yet be visible will take up slots in the shop, so some slots will appear blank
+
+
+1.1.5
+===
+-The panel showing the rewarded gamestages/xp/items/commands now only renders each category conditionally depending on whether or not anything is awarded
+-Shop buttons are 50% wider to accommodate longer titles
+-Buttons should now appropriately "tile" into multiple rows, previously they would go off screen in the first row
+-New CT field is available - "multiplierPerPurchase"
+-Commands can now be rewarded from purchases
+
+1.1.2
+===
+-Added gamestage groups, now can use AND/OR conditions and have the price multiplied if the conditions are met
+-'/elem resetshop command' now has an optional player parameter
