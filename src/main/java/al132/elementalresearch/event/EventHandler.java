@@ -42,16 +42,14 @@ public class EventHandler {
 
     @SubscribeEvent
     public void onPlayerCloned(PlayerEvent.Clone e) {
-        if (e.isWasDeath()) {
-            EntityPlayer oldPlayer = e.getOriginal();
-            EntityPlayer newPlayer = e.getEntityPlayer();
-            if (oldPlayer.hasCapability(RESEARCH_CAPABILITY, null)) {
-                ResearchCapability oldResearch = ResearchCapability.get(oldPlayer);
-                ResearchCapability newResearch = ResearchCapability.get(newPlayer);
-                newResearch.deserializeNBT(oldResearch.serializeNBT());
-                //newResearch.player = newPlayer;
-                PacketHandler.INSTANCE.sendTo(new PacketPlayerResearch(newResearch), (EntityPlayerMP) e.getEntityPlayer());
-            }
+        EntityPlayer oldPlayer = e.getOriginal();
+        EntityPlayer newPlayer = e.getEntityPlayer();
+        if (oldPlayer.hasCapability(RESEARCH_CAPABILITY, null)) {
+            ResearchCapability oldResearch = ResearchCapability.get(oldPlayer);
+            ResearchCapability newResearch = ResearchCapability.get(newPlayer);
+            newResearch.deserializeNBT(oldResearch.serializeNBT());
+            //newResearch.player = newPlayer;
+            PacketHandler.INSTANCE.sendTo(new PacketPlayerResearch(newResearch), (EntityPlayerMP) e.getEntityPlayer());
         }
     }
 
