@@ -22,6 +22,8 @@ public class CTEntryBuilder {
     @ZenProperty
     public String displayName;
     @ZenProperty
+    public String description = "";
+    @ZenProperty
     public int fireCost = 0;
     @ZenProperty
     public int waterCost = 0;

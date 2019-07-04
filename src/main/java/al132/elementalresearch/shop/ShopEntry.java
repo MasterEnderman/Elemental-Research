@@ -28,6 +28,7 @@ public class ShopEntry {
     private final List<ItemStack> outputs = new ArrayList<>();
     public final List<String> commands;
     private double multiplierPerPurchase;
+    public String description;
 
     public final int saleQuantity;
     //public final ItemStack itemCost;
@@ -35,6 +36,7 @@ public class ShopEntry {
 
     public ShopEntry(CTEntryBuilder builder) {
         this.displayName = builder.displayName;
+        this.description = builder.description;
         this.fireCost = builder.fireCost;
         this.waterCost = builder.waterCost;
         this.airCost = builder.airCost;

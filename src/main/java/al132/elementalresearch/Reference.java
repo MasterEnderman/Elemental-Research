@@ -6,7 +6,7 @@ public class Reference {
 
     public static final String MODID = "elementalresearch";
     public static final String NAME = "Elemental Research";
-    public static final String VERSION = "1.1.8";
+    public static final String VERSION = "1.2.0";
 
     public static final int FIRE_COLOR = new Color(255, 0, 0).getRGB();
     public static final int WATER_COLOR = new Color(66, 191, 244).getRGB();

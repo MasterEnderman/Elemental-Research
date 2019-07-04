@@ -8,11 +8,14 @@ import al132.elementalresearch.network.PacketPurchase;
 import al132.elementalresearch.shop.ShopEntry;
 import al132.elementalresearch.shop.ShopRegistry;
 import al132.elementalresearch.utils.RenderUtils;
+import com.google.common.collect.Lists;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.awt.*;
 import java.io.IOException;
@@ -25,6 +28,8 @@ import static al132.elementalresearch.gui.ArrowButton.Direction.LEFT;
 import static al132.elementalresearch.gui.ArrowButton.Direction.RIGHT;
 
 public class GuiShop extends GuiScreen {
+
+    final static ResourceLocation ELEM_ICONS = new ResourceLocation(Reference.MODID, "textures/gui/icons.png");
 
     private static int buttonX = 0;
     private static int buttonY = 0;
@@ -63,7 +68,9 @@ public class GuiShop extends GuiScreen {
         buttonIndex++;
         buttonList.add(new ArrowButton(buttonIndex, 64, this.height / 2, LEFT));
         buttonIndex++;
+        if (this.mc.player == null) return;
         ResearchCapability research = ResearchCapability.get(this.mc.player);
+        if (research == null) return;
         List<Integer> shopIndices = new ArrayList<>();
         if (research != null) {
             for (int i = 0; i < ShopRegistry.registry.size(); i++) {
@@ -164,13 +171,21 @@ public class GuiShop extends GuiScreen {
                     Map<ResearchType, Integer> costs = entry.calculateCostForPlayer(this.mc.player, ((CustomButton) _button).shopID);
                     int x = this.width / 8 + buttonX;
                     int y = this.height / 4 + buttonY;
-                    drawItemStack(entry.getIcon(), x + 60, y + 30, "");//$" + entry.fireCost);
-                    RenderUtils.renderText(this.mc, x + 4, y + 4, entry.displayName, 16777215);
-                    RenderUtils.renderText(this.mc, x + 4, y + 16, "F: " + costs.get(FIRE), Reference.FIRE_COLOR);
-                    RenderUtils.renderText(this.mc, x + 4, y + 28, "W: " + costs.get(WATER), Reference.WATER_COLOR);
-                    RenderUtils.renderText(this.mc, x + 4, y + 40, "A: " + costs.get(AIR), Reference.AIR_COLOR);
-                    RenderUtils.renderText(this.mc, x + 4, y + 52, "E: " + costs.get(EARTH), Reference.EARTH_COLOR);
-                    RenderUtils.renderText(this.mc, x + 4, y + 66, "XP: " + entry.experienceRequired, Reference.XP_COLOR);
+                    drawItemStack(entry.getIcon(), x + 60, y + 14, "");//$" + entry.fireCost);
+                    List<String> desc = Lists.newArrayList(WordUtils.wrap(entry.description, 16).split("\n"));
+                    for (int line = 0; line < desc.size(); line++) {
+                        RenderUtils.renderText(this.mc, x + 28, y + 30 + (line * 12), desc.get(line).replaceAll("\r", ""));
+                    }
+                    int textX = 18;
+                    RenderUtils.renderText(this.mc, x + textX, y + 4, entry.displayName);
+                    RenderUtils.renderText(this.mc, x + textX, y + 16, "" + costs.get(FIRE), Reference.FIRE_COLOR);
+                    RenderUtils.renderText(this.mc, x + textX, y + 28, "" + costs.get(WATER), Reference.WATER_COLOR);
+                    RenderUtils.renderText(this.mc, x + textX, y + 40, "" + costs.get(AIR), Reference.AIR_COLOR);
+                    RenderUtils.renderText(this.mc, x + textX, y + 52, "" + costs.get(EARTH), Reference.EARTH_COLOR);
+                    RenderUtils.renderText(this.mc, x + 1, y + 66, "XP: " + entry.experienceRequired, Reference.XP_COLOR);
+
+                    //drawIcons(x + 2, y + 14);
+
                     buttonX += buttonWidthAndMargin;
                     if ((buttonIndex + 1) % 3 == 0) {
                         buttonY += buttonHeightAndMargin;
@@ -181,6 +196,26 @@ public class GuiShop extends GuiScreen {
             }
         }
     }
+
+/*
+    public void drawIcons(int startX, int startY) {
+        int size = 12;
+        GlStateManager.pushMatrix();
+        Minecraft.getMinecraft().getTextureManager().bindTexture(ICONS);
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        GlStateManager.color(1, 1, 1, 1);
+        Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(startX, startY, 0, 16, size, size);
+        Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(startX, startY + size, size, 16, size, size);
+        Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(startX, startY + (size * 2), size * 2, 16, size, size);
+        Minecraft.getMinecraft().ingameGUI.drawTexturedModalRect(startX, startY + (size * 3), size * 3, 16, size, size);
+
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
+    }
+
+ */
 
 
     @Override
