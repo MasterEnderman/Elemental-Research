@@ -1,3 +1,11 @@
+1.3.1
+===
+-Minimum earth points per harvest can now be set to 0
+-Adjusted gui shop, should prevent components from overlapping at certain resolutions
+-Added tab completions for the /elem command
+-Added new crafttweaker method for adding item requirements for shop entries
+ ``entry.addInputs(IItemstack[] requiredInputs, boolean consume);``
+
 1.3.0
 ===
 -Added configs for enabling elements/setting points per action/etc

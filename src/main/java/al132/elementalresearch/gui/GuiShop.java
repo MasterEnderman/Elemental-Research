@@ -38,6 +38,7 @@ public class GuiShop extends GuiScreen {
     int buttonWidthAndMargin = CustomButton.BASE_WIDTH + 5;
     int buttonHeightAndMargin = 85;
     int startX = 30;
+    int startY = 70;
 
 
     public static void resetButtonXY() {
@@ -89,7 +90,7 @@ public class GuiShop extends GuiScreen {
                 if (shopIndices.size() > i) {
                     ShopEntry entry = ShopRegistry.registry.get(shopIndices.get(i));
                     if (entry != null) {
-                        this.buttonList.add(new CustomButton(buttonIndex, (startX) + buttonX, (this.height / 4) + buttonY,
+                        this.buttonList.add(new CustomButton(buttonIndex, startX + buttonX, startY + buttonY,
                                 "", ShopRegistry.registry.get(shopIndices.get(i)), shopIndices.get(i)));
                         buttonX += buttonWidthAndMargin;
                         if ((buttonIndex - 1) % 3 == 0) {
@@ -158,11 +159,11 @@ public class GuiShop extends GuiScreen {
 
                 RenderUtils.renderText(this.mc, requirementBoxX + 4, requirementBoxY + 4,
                         "Additional Requirements: ");
-                RenderUtils.renderText(this.mc, requirementBoxX + 4, requirementBoxY + 20, "Consume: " + hovered.entry.consumeItemInputs);
-                RenderUtils.renderText(this.mc, requirementBoxX + 4, requirementBoxY + 40, "Items Required:");
-                for (int i = 0; i < hovered.entry.getOutputs().size(); i++) {
+                RenderUtils.renderText(this.mc, requirementBoxX + 4, requirementBoxY + 40, "Consume Items: " + hovered.entry.consumeItemInputs);
+                RenderUtils.renderText(this.mc, requirementBoxX + 4, requirementBoxY + 20, "Required:");
+                for (int i = 0; i < hovered.entry.getInputs().size(); i++) {
                     RenderUtils.renderItemStackWithCount(this.mc, mc.getRenderItem(),
-                            hovered.entry.getInputs().get(i), requirementBoxX + 64 + (i * 18), requirementBoxY + 40, true);
+                            hovered.entry.getInputs().get(i), requirementBoxX + 50 + (i * 18), requirementBoxY + 20, true);
                 }
             }
 
@@ -200,7 +201,7 @@ public class GuiShop extends GuiScreen {
                 if (entry.requiredGamestages.stream().allMatch(x -> x.evaluateFor(this.mc.player).result)) {
                     Map<ResearchType, Integer> costs = entry.calculateCostForPlayer(this.mc.player, ((CustomButton) _button).shopID);
                     int x = startX + buttonX;
-                    int y = this.height / 4 + buttonY;
+                    int y = startY + buttonY;
                     drawItemStack(entry.getIcon(), x + 60, y + 14, "");//$" + entry.fireCost);
                     try {
                         List<String> desc = Lists.newArrayList(WordUtils.wrap(entry.description, 17).split("\n"));

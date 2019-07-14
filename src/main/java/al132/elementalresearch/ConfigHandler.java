@@ -37,8 +37,8 @@ public class ConfigHandler {
         @Config.RangeInt(min = 1, max = Integer.MAX_VALUE)
         public int pointsPerFireDamage = 1;
 
-        @Config.Comment({"Earth points per block broken by default (set exceptions below) [default: 1, min: 1, max: 2,147,483,647]"})
-        @Config.RangeInt(min = 1, max = Integer.MAX_VALUE)
+        @Config.Comment({"Earth points per block broken by default (set exceptions below) [default: 1, min: 0, max: 2,147,483,647]"})
+        @Config.RangeInt(min = 0, max = Integer.MAX_VALUE)
         public int pointsPerHarvest = 1;
 
         @Config.Comment({"If earth points are enabled, the following will set custom point values for specific blocks, use the format <modid>:<name>:<meta>:<points>"})

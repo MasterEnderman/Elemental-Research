@@ -6,6 +6,7 @@ import al132.elementalresearch.network.PacketHandler;
 import al132.elementalresearch.network.PacketPlayerResearch;
 import al132.elementalresearch.shop.ShopEntry;
 import al132.elementalresearch.shop.ShopRegistry;
+import com.google.common.collect.Lists;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -27,7 +28,7 @@ public class GeneralCommand extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "elem |resetshop|";
+        return "elem <resetshop|add|set|subtract>";
     }
 
     @Override
@@ -77,11 +78,18 @@ public class GeneralCommand extends CommandBase {
     @Override
     @Nonnull
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        List<String> output = new ArrayList<>();
-        output.add("add");
-        output.add("subtract");
-        output.add("set");
-        output.add("resetshop");
-        return output;
+        if (args.length == 1) {
+            return getListOfStringsMatchingLastWord(args, "add", "subtract", "set", "resetshop");
+        }
+        if (args.length == 2) {
+            return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
+        }
+        if (args.length == 3 && !args[0].equals("resetshop")) {
+            return getListOfStringsMatchingLastWord(args, "fire", "water", "air", "earth");
+        }
+        if (args.length == 4 && !args[0].equals("resetshop")) {
+            return Lists.newArrayList("0", "10", "100", "1000");
+        }
+        return Collections.emptyList();
     }
 }

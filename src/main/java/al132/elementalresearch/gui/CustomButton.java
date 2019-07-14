@@ -2,11 +2,13 @@ package al132.elementalresearch.gui;
 
 import al132.elementalresearch.Reference;
 import al132.elementalresearch.capabilities.ResearchCapability;
+import al132.elementalresearch.shop.PurchaseValidator;
 import al132.elementalresearch.shop.ShopEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -34,9 +36,10 @@ public class CustomButton extends GuiButton {
     }
 
     public void updateStatus() {
-        if (Minecraft.getMinecraft().player != null) {
-            ResearchCapability research = ResearchCapability.get(Minecraft.getMinecraft().player);
-            this.enabled = research.canAfford(Minecraft.getMinecraft().player, this.entry, this.shopID);
+        EntityPlayer player = Minecraft.getMinecraft().player;
+        if (player != null) {
+            ResearchCapability research = ResearchCapability.get(player);
+            this.enabled = PurchaseValidator.hasItems(player,this.entry.getInputs()) && research.canAfford(player, this.entry, this.shopID);
         }
     }
 
