@@ -1,3 +1,18 @@
+1.3.0
+===
+-Added configs for enabling elements/setting points per action/etc
+-Replace "XP" text with an XP icon
+-Replaced & moved the arrow buttons
+-Expanded the width of shop buttons by 30 px
+-Shop entry costs will no longer overlap with descriptions, at least to the 100s place
+-Re-added descriptions, they should now log an error instead of crash if they fail (I still have no idea why they ever failed..)
+-Shop entries are now identified by UUID rather than integers in a list, this should properly preserve shop data for users
+ even after entries are added and removed with crafttweaker. A legacy adapter was added, so this should not crash old worlds
+-Added a 'priority' field to shop entries i.e. ``entry3.priority = 20`` for sorting which order shop entries are displayed
+-Added new modifier logic types for ``addRequiredStagesWithModifier`` , "FOREACH_OR" and "FOREACH_AND" -
+ these will multiply the modifier by the number of stages unlocked. The behavior of "OR" and "AND" has not changed
+ they use standard boolean logic and will only apply the modifier once as long as the AND|OR condition is met
+
 1.1.8
 ===
 -Fixed research data not persisting after changing dimensions

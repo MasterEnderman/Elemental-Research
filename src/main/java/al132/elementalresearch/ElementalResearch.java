@@ -20,7 +20,7 @@ import org.apache.logging.log4j.Logger;
 @Mod.EventBusSubscriber
 public class ElementalResearch {
 
-    static Logger logger;
+    public static Logger logger;
 
     @Mod.Instance
     public static ElementalResearch INSTANCE;

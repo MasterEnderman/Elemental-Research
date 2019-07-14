@@ -7,14 +7,11 @@ import al132.elementalresearch.compat.ct.StageGroup;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static al132.elementalresearch.capabilities.ResearchCapability.ResearchType.*;
 
-public class ShopEntry {
+public class ShopEntry implements Comparable<ShopEntry> {
 
     public final String displayName;
     private final int fireCost;
@@ -29,9 +26,11 @@ public class ShopEntry {
     public final List<String> commands;
     private double multiplierPerPurchase;
     public String description;
+    public final int priority;
 
     public final int saleQuantity;
-    //public final ItemStack itemCost;
+    private final List<ItemStack> itemInputs = new ArrayList<>();
+    public final boolean consumeItemInputs;
     private final ItemStack icon;
 
     public ShopEntry(CTEntryBuilder builder) {
@@ -41,6 +40,7 @@ public class ShopEntry {
         this.waterCost = builder.waterCost;
         this.airCost = builder.airCost;
         this.earthCost = builder.earthCost;
+        this.priority = builder.priority;
         this.multiplierPerPurchase = builder.multiplierPerPurchase;
         this.experienceRequired = builder.experienceRequired;
         this.experienceGiven = builder.experienceGiven;
@@ -48,6 +48,13 @@ public class ShopEntry {
         this.givenGamestages = builder.givenGamestages;
         this.saleQuantity = builder.saleQuantity;
         this.commands = builder.commands;
+        this.consumeItemInputs = builder.consumeInputs;
+
+        if(builder.itemInputs != null) {
+            builder.itemInputs.stream()
+                    .map(x -> (ItemStack) x.getInternal())
+                    .forEach(itemInputs::add);
+        }
         if (builder.itemOutputs != null) {
             builder.itemOutputs.stream()
                     .map(x -> (ItemStack) x.getInternal())
@@ -65,19 +72,20 @@ public class ShopEntry {
         else return this.earthCost;
     }
 
-    public Map<ResearchType, Integer> calculateCostForPlayer(EntityPlayer player, int index) {
+    public Map<ResearchType, Integer> calculateCostForPlayer(EntityPlayer player, UUID index) {
         ResearchCapability research = ResearchCapability.get(player);
         int purchasesMade = research.shopQuantity.get(index).quantityPurchased;
-        HashMap<ResearchType, Integer> result = new HashMap<>();
+        HashMap<ResearchType, Integer> output = new HashMap<>();
         for (ResearchType type : ResearchType.values()) {
             double baseCost = (double) this.getElementCost(type);
             for (StageGroup group : this.requiredGamestages) {
-                if (group.evaluateFor(player)) baseCost *= group.costModifier;
+                StageGroup.EvaluationResult evalResult = group.evaluateFor(player);
+                if (group.evaluateFor(player).result) baseCost *= evalResult.modifier;
             }
             double perPurchaseMultiplier = Math.pow(this.multiplierPerPurchase, purchasesMade);
-            result.put(type, (int) Math.round(baseCost * perPurchaseMultiplier));
+            output.put(type, (int) Math.round(baseCost * perPurchaseMultiplier));
         }
-        return result;
+        return output;
     }
 
     public ItemStack getIcon() {
@@ -89,6 +97,13 @@ public class ShopEntry {
         this.outputs.forEach(x -> result.add(x.copy()));
         return result;
     }
+
+    public List<ItemStack> getInputs(){
+        List<ItemStack> result = new ArrayList<>();
+        this.itemInputs.forEach(x -> result.add(x.copy()));
+        return result;
+    }
+
 
     @Override
     public String toString() {
@@ -111,5 +126,11 @@ public class ShopEntry {
         builder.append("\toutputs: ");
         builder.append(getOutputs());
         return builder.toString();
+    }
+
+    @Override
+    public int compareTo(ShopEntry o) {
+        //we want high priority to come first, so we are putting this as the second parameter
+        return Integer.compare(o.priority, this.priority);
     }
 }

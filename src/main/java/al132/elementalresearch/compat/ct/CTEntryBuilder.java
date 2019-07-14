@@ -40,15 +40,27 @@ public class CTEntryBuilder {
     @ZenProperty
     public int experienceGiven = 0;
     @ZenProperty
+    public int priority = 0;
+    @ZenProperty
     public List<StageGroup> requiredGamestages = new ArrayList<>();
     @ZenProperty
     public List<String> givenGamestages = new ArrayList<>();
+    @ZenProperty
+    public List<IItemStack> itemInputs = new ArrayList<>();
+    @ZenProperty
+    public boolean consumeInputs = true;
     @ZenProperty
     public List<IItemStack> itemOutputs = new ArrayList<>();
     @ZenProperty
     public List<String> commands = new ArrayList<>();
     @ZenProperty
     public double multiplierPerPurchase = 1.0;
+
+    @ZenMethod
+    public void addInputs(IItemStack[] stacks, boolean consume) {
+        this.itemInputs = Lists.newArrayList(stacks);
+        this.consumeInputs = consume;
+    }
 
     @ZenMethod
     public void addCommand(String command) {

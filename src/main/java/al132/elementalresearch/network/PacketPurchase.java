@@ -7,24 +7,30 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
+import java.util.UUID;
+
 public class PacketPurchase implements IMessage {
-    private int index;
+    private long mostSigBits;
+    private long leastSigBits;
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        index = buf.readInt();
+        mostSigBits = buf.readLong();
+        leastSigBits = buf.readLong();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-        buf.writeInt(index);
+        buf.writeLong(mostSigBits);
+        buf.writeLong(leastSigBits);
     }
 
     public PacketPurchase() {
     }
 
-    public PacketPurchase(int index) {
-        this.index = index;
+    public PacketPurchase(UUID index) {
+        this.mostSigBits = index.getMostSignificantBits();
+        this.leastSigBits = index.getLeastSignificantBits();
     }
 
     public static class Handler implements IMessageHandler<PacketPurchase, IMessage> {
@@ -35,7 +41,7 @@ public class PacketPurchase implements IMessage {
         }
 
         private void handle(PacketPurchase message, MessageContext ctx) {
-            PurchaseValidator.executePurchase(ctx.getServerHandler().player, message.index);
+            PurchaseValidator.executePurchase(ctx.getServerHandler().player, new UUID(message.mostSigBits, message.leastSigBits));
         }
     }
 }

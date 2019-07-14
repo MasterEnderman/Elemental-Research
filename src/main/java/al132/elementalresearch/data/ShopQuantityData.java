@@ -1,4 +1,4 @@
-package al132.elementalresearch.util;
+package al132.elementalresearch.data;
 
 public class ShopQuantityData {
     //    //LEFT: QuantityRemaining, RIGHT: AmountPurchased

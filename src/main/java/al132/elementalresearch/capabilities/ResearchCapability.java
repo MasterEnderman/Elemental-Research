@@ -1,7 +1,8 @@
 package al132.elementalresearch.capabilities;
 
+import al132.elementalresearch.ConfigHandler;
+import al132.elementalresearch.data.ShopQuantityData;
 import al132.elementalresearch.shop.ShopEntry;
-import al132.elementalresearch.util.ShopQuantityData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -17,6 +18,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import static al132.elementalresearch.capabilities.ResearchCapability.ResearchType.*;
 
@@ -56,7 +59,7 @@ public class ResearchCapability implements ICapabilitySerializable<NBTBase> {
     private boolean airVisible = false;
     private boolean earthVisible = false;
     //LEFT: QuantityRemaining, RIGHT: AmountPurchased
-    public HashMap<Integer, ShopQuantityData> shopQuantity = new HashMap<>();
+    public HashMap<UUID, ShopQuantityData> shopQuantity = new HashMap<>();
 
     public ResearchCapability() {
     }
@@ -69,12 +72,12 @@ public class ResearchCapability implements ICapabilitySerializable<NBTBase> {
                 & this.earth >= earth;
     }
 
-    public boolean canAfford(EntityPlayer player, ShopEntry entry, int index) {
+    public boolean canAfford(EntityPlayer player, ShopEntry entry, UUID index) {
         Map<ResearchType, Integer> prices = entry.calculateCostForPlayer(player, index);
         return canAfford(prices.get(FIRE), prices.get(WATER), prices.get(AIR), prices.get(EARTH));
     }
 
-    public void executePurchase(EntityPlayer player, int key, ShopEntry entry) {
+    public void executePurchase(EntityPlayer player, UUID key, ShopEntry entry) {
         int amountRemaining = shopQuantity.get(key).quantityRemaining;
         int amountPurchased = shopQuantity.get(key).quantityPurchased;
 
@@ -120,7 +123,7 @@ public class ResearchCapability implements ICapabilitySerializable<NBTBase> {
 
     public void jump() {
         jumpCounter++;
-        if (jumpCounter > 3) {
+        if (jumpCounter >= ConfigHandler.general.jumpsPerAirPoint) {
             jumpCounter = 0;
             increase(AIR, 1);
         }
@@ -157,7 +160,7 @@ public class ResearchCapability implements ICapabilitySerializable<NBTBase> {
         tag.setBoolean("waterVisible", waterVisible);
         tag.setBoolean("airVisible", airVisible);
         tag.setBoolean("earthVisible", earthVisible);
-        HashMap<Integer, Pair<Integer, Integer>> shopQuantityNBT = new HashMap<>();
+        HashMap<UUID, Pair<Integer, Integer>> shopQuantityNBT = new HashMap<>();
         shopQuantity.forEach((key, value) ->
                 shopQuantityNBT.put(key, new MutablePair(value.quantityRemaining, value.quantityPurchased)));
         tag.setByteArray("shopQuantity", SerializationUtils.serialize(shopQuantityNBT));
@@ -178,13 +181,22 @@ public class ResearchCapability implements ICapabilitySerializable<NBTBase> {
         airVisible = tag.getBoolean("airVisible");
         earthVisible = tag.getBoolean("earthVisible");
         if (tag.hasKey("shopQuantity")) {
-            HashMap<Integer, Pair<Integer, Integer>> rawShopData = new HashMap<>();
-            rawShopData = SerializationUtils.deserialize(tag.getByteArray("shopQuantity"));
-            rawShopData.forEach((key, value) -> shopQuantity.put(key, new ShopQuantityData(value.getLeft(), value.getRight())));
+            HashMap<Object, Pair<Integer, Integer>> rawData = new HashMap<>();
+            rawData = SerializationUtils.deserialize(tag.getByteArray("shopQuantity"));
+            Optional<Object> firstKey = rawData.keySet().stream().findFirst();
+            if (firstKey.isPresent()) {
+                if (firstKey.get() instanceof Integer) { //legacy compat
+                    rawData.forEach((key, value) -> shopQuantity.put(UUID.randomUUID(),
+                            new ShopQuantityData(value.getLeft(), value.getRight())));
+                } else if (firstKey.get() instanceof UUID) {
+                    rawData.forEach((key, value) -> shopQuantity.put((UUID) key,
+                            new ShopQuantityData(value.getLeft(), value.getRight())));
+                }
+            }
+
         }
         //UUID uuid = SerializationUtils.deserialize(tag.getByteArray("player"));
         //player = (EntityPlayer) Minecraft.getMinecraft().player.getEntityWorld().getMinecraftServer().getEntityFromUuid(uuid);
-
     }
 
 

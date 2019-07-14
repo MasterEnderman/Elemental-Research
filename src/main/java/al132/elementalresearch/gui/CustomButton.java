@@ -11,6 +11,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.UUID;
+
 @SideOnly(Side.CLIENT)
 public class CustomButton extends GuiButton {
 
@@ -22,10 +24,11 @@ public class CustomButton extends GuiButton {
 
     static ResourceLocation currentLocation = null;
     public ShopEntry entry;
-    public int shopID;
+    public UUID shopID;
+    public final static int BASE_WIDTH = 150;
 
-    public CustomButton(int buttonId, int x, int y, String buttonText, ShopEntry entry, int shopID) {//}, ItemStack stack, int price) {
-        super(buttonId, x, y, 120, 80, buttonText);
+    public CustomButton(int buttonId, int x, int y, String buttonText, ShopEntry entry, UUID shopID) {//}, ItemStack stack, int price) {
+        super(buttonId, x, y, 150, 80, buttonText);
         this.entry = entry;
         this.shopID = shopID;
     }
@@ -83,5 +86,6 @@ public class CustomButton extends GuiButton {
         this.drawTexturedModalRect(startX, startY + size, size, 16, size, size);
         this.drawTexturedModalRect(startX, startY + (size * 2), size * 2, 16, size, size);
         this.drawTexturedModalRect(startX, startY + (size * 3), size * 3, 16, size, size);
+        this.drawTexturedModalRect(startX, startY + (size * 4), size * 4, 16, size, size);
     }
 }

@@ -17,6 +17,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static al132.elementalresearch.Reference.*;
 import static al132.elementalresearch.capabilities.ResearchCapability.ResearchType.*;
@@ -95,10 +96,10 @@ public class ClientEventHandler {
         EntityPlayer player = Minecraft.getMinecraft().player;
         ResearchCapability research = ResearchCapability.get(player);
         if (research == null) return;
-        for (Map.Entry<Integer, ShopEntry> mapEntry : ShopRegistry.registry.entrySet()) {
+        for (Map.Entry<UUID, ShopEntry> mapEntry : ShopRegistry.registry.entrySet()) {
             List<StageGroup> requiredStages = mapEntry.getValue().requiredGamestages;
             if (research.shopQuantity.get(mapEntry.getKey()).quantityRemaining != 0
-                    && requiredStages.stream().allMatch(group -> group.evaluateFor(player))) {
+                    && requiredStages.stream().allMatch(group -> group.evaluateFor(player).result)) {
                 Minecraft.getMinecraft().displayGuiScreen(new GuiShop());
                 return;
             }

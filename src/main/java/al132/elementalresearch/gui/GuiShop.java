@@ -1,5 +1,6 @@
 package al132.elementalresearch.gui;
 
+import al132.elementalresearch.ElementalResearch;
 import al132.elementalresearch.Reference;
 import al132.elementalresearch.capabilities.ResearchCapability;
 import al132.elementalresearch.capabilities.ResearchCapability.ResearchType;
@@ -19,9 +20,8 @@ import org.apache.commons.lang3.text.WordUtils;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static al132.elementalresearch.capabilities.ResearchCapability.ResearchType.*;
 import static al132.elementalresearch.gui.ArrowButton.Direction.LEFT;
@@ -35,8 +35,9 @@ public class GuiShop extends GuiScreen {
     private static int buttonY = 0;
     private int pageIndex = 0;
 
-    int buttonWidthAndMargin = 125;
+    int buttonWidthAndMargin = CustomButton.BASE_WIDTH + 5;
     int buttonHeightAndMargin = 85;
+    int startX = 30;
 
 
     public static void resetButtonXY() {
@@ -64,29 +65,31 @@ public class GuiShop extends GuiScreen {
         this.buttonList.clear();
         int buttonIndex = 0;
         resetButtonXY();
-        buttonList.add(new ArrowButton(buttonIndex, this.width - 32, this.height / 2, RIGHT));
+        buttonList.add(new ArrowButton(buttonIndex, 5, 240, LEFT));
         buttonIndex++;
-        buttonList.add(new ArrowButton(buttonIndex, 64, this.height / 2, LEFT));
+        buttonList.add(new ArrowButton(buttonIndex, 5 + 32, 240, RIGHT));
         buttonIndex++;
-        if (this.mc.player == null) return;
+        if (this.mc == null || this.mc.player == null) return;
         ResearchCapability research = ResearchCapability.get(this.mc.player);
         if (research == null) return;
-        List<Integer> shopIndices = new ArrayList<>();
+        List<UUID> shopIndices = new ArrayList<>();
         if (research != null) {
-            for (int i = 0; i < ShopRegistry.registry.size(); i++) {
-                if (research.shopQuantity.get(i).quantityRemaining != 0
-                        && ShopRegistry.registry.get(i).requiredGamestages.stream().allMatch(x -> x.evaluateFor(this.mc.player))) {
-                    shopIndices.add(i);
+            ShopRegistry.registry.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getValue)).forEach(registryEntry -> {
+                //for (Map.Entry<UUID, ShopEntry> registryEntry : ShopRegistry.registry.entrySet()) {
+
+                //for (int i = 0; i < ShopRegistry.registry.size(); i++) {
+                if (research.shopQuantity.get(registryEntry.getKey()).quantityRemaining != 0
+                        && ShopRegistry.registry.get(registryEntry.getKey()).requiredGamestages.stream()
+                        .allMatch(x -> x.evaluateFor(this.mc.player).result)) {
+                    shopIndices.add(registryEntry.getKey());
                 }
-            }
+            });
 
             for (int i = (6 * pageIndex); i < (6 * (pageIndex + 1)); i++) {
                 if (shopIndices.size() > i) {
                     ShopEntry entry = ShopRegistry.registry.get(shopIndices.get(i));
                     if (entry != null) {
-                        //if (research.shopQuantity.get(i).quantityRemaining != 0
-                        //        && entry.requiredGamestages.stream().allMatch(x -> x.evaluateFor(this.mc.player))) {
-                        this.buttonList.add(new CustomButton(buttonIndex, (this.width / 8) + buttonX, (this.height / 4) + buttonY,
+                        this.buttonList.add(new CustomButton(buttonIndex, (startX) + buttonX, (this.height / 4) + buttonY,
                                 "", ShopRegistry.registry.get(shopIndices.get(i)), shopIndices.get(i)));
                         buttonX += buttonWidthAndMargin;
                         if ((buttonIndex - 1) % 3 == 0) {
@@ -94,20 +97,29 @@ public class GuiShop extends GuiScreen {
                             resetButtonX();
                         }
                         buttonIndex++;
-
-                        // }
                     }
                 }
             }
         }
+        if (!canPageLeft()) buttonList.get(0).visible = false;
+        if (!canPageRight()) buttonList.get(1).visible = false;
+    }
+
+
+    public boolean canPageLeft() {
+        return pageIndex > 0;
+    }
+
+    public boolean canPageRight() {
+        return (this.buttonList.size() - 2) / 6 > this.pageIndex;
     }
 
     public void pageLeft() {
-        if (pageIndex > 0) pageIndex--;
+        if (canPageLeft()) pageIndex--;
     }
 
     public void pageRight() {
-        if ((this.buttonList.size() - 2) / 6 > this.pageIndex) pageIndex++;
+        if (canPageRight()) pageIndex++;
     }
 
     @Override
@@ -137,24 +149,42 @@ public class GuiShop extends GuiScreen {
         GuiButton _hovered = this.buttonList.stream().filter(GuiButton::isMouseOver).findFirst().orElse(null);
         if (_hovered != null) {
             CustomButton hovered = (CustomButton) _hovered;
-            int boxX = this.width / 4 - 24;
-            int boxY = 5;
-            RenderUtils.drawBeveledBox(boxX, boxY,
-                    boxX + 200, boxY + 60, Color.darkGray.getRGB(), Color.black.getRGB(), 0xAA555555);
-            if (!hovered.entry.commands.isEmpty()) {
-                RenderUtils.renderText(this.mc, boxX + 4, boxY + 4, "Runs Commands: " + hovered.entry.commands.size());
-            }
-            if (!hovered.entry.givenGamestages.isEmpty()) {
-                RenderUtils.renderText(this.mc, boxX + 4, boxY + 16, "Unlocks Gamestages: " + hovered.entry.givenGamestages);
-            }
-            if (hovered.entry.experienceGiven > 0) {
-                RenderUtils.renderText(this.mc, boxX + 4, boxY + 28, "XP Levels Received: " + hovered.entry.experienceGiven);
-            }
-            if (!hovered.entry.getOutputs().isEmpty()) {
-                RenderUtils.renderText(this.mc, boxX + 4, boxY + 40, "Items Given:");
+            //Requirement Box
+            int requirementBoxX = 80;
+            int requirementBoxY = 5;
+            if (!hovered.entry.getInputs().isEmpty()) {
+                RenderUtils.drawBeveledBox(requirementBoxX, requirementBoxY,
+                        requirementBoxX + 200, requirementBoxY + 60, Color.darkGray.getRGB(), Color.black.getRGB(), 0xAA555555);
+
+                RenderUtils.renderText(this.mc, requirementBoxX + 4, requirementBoxY + 4,
+                        "Additional Requirements: ");
+                RenderUtils.renderText(this.mc, requirementBoxX + 4, requirementBoxY + 20, "Consume: " + hovered.entry.consumeItemInputs);
+                RenderUtils.renderText(this.mc, requirementBoxX + 4, requirementBoxY + 40, "Items Required:");
                 for (int i = 0; i < hovered.entry.getOutputs().size(); i++) {
                     RenderUtils.renderItemStackWithCount(this.mc, mc.getRenderItem(),
-                            hovered.entry.getOutputs().get(i), boxX + 64 + (i * 18), boxY + 40, true);
+                            hovered.entry.getInputs().get(i), requirementBoxX + 64 + (i * 18), requirementBoxY + 40, true);
+                }
+            }
+
+            //Reward Box
+            int rewardBoxX = requirementBoxX + 200 + 5;
+            int rewardBoxY = 5;
+            RenderUtils.drawBeveledBox(rewardBoxX, rewardBoxY,
+                    rewardBoxX + 200, rewardBoxY + 60, Color.darkGray.getRGB(), Color.black.getRGB(), 0xAA555555);
+            if (!hovered.entry.commands.isEmpty()) {
+                RenderUtils.renderText(this.mc, rewardBoxX + 4, rewardBoxY + 4, "Runs Commands: " + hovered.entry.commands.size());
+            }
+            if (!hovered.entry.givenGamestages.isEmpty()) {
+                RenderUtils.renderText(this.mc, rewardBoxX + 4, rewardBoxY + 16, "Unlocks Gamestages: " + hovered.entry.givenGamestages);
+            }
+            if (hovered.entry.experienceGiven > 0) {
+                RenderUtils.renderText(this.mc, rewardBoxX + 4, rewardBoxY + 28, "XP Levels Received: " + hovered.entry.experienceGiven);
+            }
+            if (!hovered.entry.getOutputs().isEmpty()) {
+                RenderUtils.renderText(this.mc, rewardBoxX + 4, rewardBoxY + 40, "Items Given:");
+                for (int i = 0; i < hovered.entry.getOutputs().size(); i++) {
+                    RenderUtils.renderItemStackWithCount(this.mc, mc.getRenderItem(),
+                            hovered.entry.getOutputs().get(i), rewardBoxX + 64 + (i * 18), rewardBoxY + 40, true);
                 }
             }
 
@@ -167,22 +197,26 @@ public class GuiShop extends GuiScreen {
             if (buttonList.size() > i) {
                 GuiButton _button = buttonList.get(i);
                 ShopEntry entry = ((CustomButton) _button).entry;
-                if (entry.requiredGamestages.stream().allMatch(x -> x.evaluateFor(this.mc.player))) {
+                if (entry.requiredGamestages.stream().allMatch(x -> x.evaluateFor(this.mc.player).result)) {
                     Map<ResearchType, Integer> costs = entry.calculateCostForPlayer(this.mc.player, ((CustomButton) _button).shopID);
-                    int x = this.width / 8 + buttonX;
+                    int x = startX + buttonX;
                     int y = this.height / 4 + buttonY;
                     drawItemStack(entry.getIcon(), x + 60, y + 14, "");//$" + entry.fireCost);
-                    List<String> desc = Lists.newArrayList(WordUtils.wrap(entry.description, 16).split("\n"));
-                    for (int line = 0; line < desc.size(); line++) {
-                        RenderUtils.renderText(this.mc, x + 28, y + 30 + (line * 12), desc.get(line).replaceAll("\r", ""));
+                    try {
+                        List<String> desc = Lists.newArrayList(WordUtils.wrap(entry.description, 17).split("\n"));
+                        for (int line = 0; line < desc.size(); line++) {
+                            RenderUtils.renderText(this.mc, x + 36, y + 30 + (line * 12), desc.get(line).replaceAll("\r", ""));
+                        }
+                    } catch (Exception e) {
+                        ElementalResearch.logger.warn("Failed to render shop entry description");
                     }
-                    int textX = 18;
+                    int textX = 16;
                     RenderUtils.renderText(this.mc, x + textX, y + 4, entry.displayName);
                     RenderUtils.renderText(this.mc, x + textX, y + 16, "" + costs.get(FIRE), Reference.FIRE_COLOR);
                     RenderUtils.renderText(this.mc, x + textX, y + 28, "" + costs.get(WATER), Reference.WATER_COLOR);
                     RenderUtils.renderText(this.mc, x + textX, y + 40, "" + costs.get(AIR), Reference.AIR_COLOR);
                     RenderUtils.renderText(this.mc, x + textX, y + 52, "" + costs.get(EARTH), Reference.EARTH_COLOR);
-                    RenderUtils.renderText(this.mc, x + 1, y + 66, "XP: " + entry.experienceRequired, Reference.XP_COLOR);
+                    RenderUtils.renderText(this.mc, x + textX, y + 66, "" + entry.experienceRequired, Reference.XP_COLOR);
 
                     //drawIcons(x + 2, y + 14);
 

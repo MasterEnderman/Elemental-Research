@@ -1,11 +1,11 @@
 package al132.elementalresearch.command;
 
 import al132.elementalresearch.capabilities.ResearchCapability;
+import al132.elementalresearch.data.ShopQuantityData;
 import al132.elementalresearch.network.PacketHandler;
 import al132.elementalresearch.network.PacketPlayerResearch;
 import al132.elementalresearch.shop.ShopEntry;
 import al132.elementalresearch.shop.ShopRegistry;
-import al132.elementalresearch.util.ShopQuantityData;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -17,10 +17,7 @@ import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GeneralCommand extends CommandBase {
     @Override
@@ -63,7 +60,7 @@ public class GeneralCommand extends CommandBase {
                 EntityPlayer player = (EntityPlayer) sender.getCommandSenderEntity();
                 ResearchCapability research = ResearchCapability.get(player);
                 research.shopQuantity = new HashMap<>();
-                for (Map.Entry<Integer, ShopEntry> mapEntry : ShopRegistry.registry.entrySet()) {
+                for (Map.Entry<UUID, ShopEntry> mapEntry : ShopRegistry.registry.entrySet()) {
                     research.shopQuantity.put(mapEntry.getKey(), new ShopQuantityData(mapEntry.getValue().saleQuantity, 0));
                 }
                 PacketHandler.INSTANCE.sendTo(new PacketPlayerResearch(research), (EntityPlayerMP) player);

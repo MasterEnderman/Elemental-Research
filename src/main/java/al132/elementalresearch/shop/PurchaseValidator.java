@@ -8,9 +8,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextComponentString;
 
+import java.util.UUID;
+
 public class PurchaseValidator {
 
-    public static void executePurchase(EntityPlayer player, int shopIndex) {
+    public static void executePurchase(EntityPlayer player, UUID shopIndex) {
         ResearchCapability research = player.getCapability(ResearchCapability.RESEARCH_CAPABILITY, null);
         if (research != null) {
             ShopEntry entry = ShopRegistry.registry.get(shopIndex);
